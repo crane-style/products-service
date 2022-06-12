@@ -9,7 +9,10 @@ const db = new Pool({
   'max?': 10,
   'allowExitOnIdle?': false,
 });
-
+db.on('error', (err, client) => {
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
 // if (cluster.isMaster) {
 //   for (let i = 0; i < numCPUs; i += 1) {
 //     // Create a worker
@@ -23,11 +26,17 @@ app.get('/product', (req, res) => {
   let page = Number.parseFloat(req.query.page);
   count = Number.isInteger(count) ? count : 5;
   page = Number.isInteger(page) || page === 0 ? page : 1;
-  db.query(`SELECT * FROM product LIMIT ${count} OFFSET ${count * page - count}`)
-    .then((dbRes) => {
-      res.status(200).json(dbRes.rows);
-    })
-    .catch(err => res.status(500).send(err.stack));
+  db.connect()
+    .then((client) => client.query(`SELECT * FROM product LIMIT ${count} OFFSET ${count * page - count}`)
+      .then((dbRes) => {
+        client.release();
+        res.status(200).json(dbRes.rows);
+      })
+      .catch((err) => {
+        client.realease();
+        res.status(500).send(err.stack);
+      }))
+    .catch((err) => res.status(500).send(err.stack));
 });
 
 app.get('/product/:product_id', (req, res) => {
