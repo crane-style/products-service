@@ -9,7 +9,6 @@ const pool = new Pool({
   allowExitOnIdle?: false
 });
 pool.query('SELECT id from product limit 5', (err, res) => {
-  console.log(res.rows);
   pool.end()
 })
 

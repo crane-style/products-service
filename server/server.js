@@ -1,11 +1,22 @@
 require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
 
-const db = new Pool({ database: 'productservices' });
+const db = new Pool({
+  database: 'productservices',
+  'max?': 10,
+  'allowExitOnIdle?': false,
+});
 
+// if (cluster.isMaster) {
+//   for (let i = 0; i < numCPUs; i += 1) {
+//     // Create a worker
+//     cluster.fork();
+//   }
+// } else {
 const app = express();
-
 app.use(express.json());
 app.get('/product', (req, res) => {
   let count = Number.parseFloat(req.query.count);
@@ -50,7 +61,7 @@ app.get('/product/:product_id/styles', (req, res) => {
           .then((dbRes2) => {
             resObj.results[i].photos = dbRes2.rows;
             return db.query(`SELECT sku_id, size, quantity FROM skus where style_id= ${styleObj.style_id}`)
-              .then(dbRes3 => {
+              .then((dbRes3) => {
                 resObj.results[i].skus = {};
                 dbRes3.rows.forEach((skuDeetsObj) => {
                   const { sku_id, size, quantity } = skuDeetsObj;
@@ -62,7 +73,7 @@ app.get('/product/:product_id/styles', (req, res) => {
       .then(() => {
         res.status(200).json(resObj);
       })
-      .catch(err => {
+      .catch((err) => {
         res.sendStatus(400);
       });
   }
@@ -81,7 +92,7 @@ app.get('/product/:product_id/related', (req, res) => {
       })
       .catch((err) => {
         res.sendStatus(400);
-      })
+      });
   }
 });
 
@@ -103,3 +114,4 @@ process.on('SIGINT', () => {
     console.log('HTTP server closed');
   });
 });
+// }
