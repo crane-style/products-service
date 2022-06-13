@@ -1,17 +1,4 @@
 SELECT JSON_BUILD_OBJECT(
-  s.sku_id, JSON_BUILD_OBJECT(
-    'size', s.size,
-    'quantity', s.quantity
-  )
-)
-FROM skus s WHERE style_id = (
-  SELECT 3;
-
-SELECT * FROM styles st WHERE product_id = 3;
-
-
-
-SELECT JSON_BUILD_OBJECT(
   'product_id', 3,
   'results', ARRAY_TO_JSON(ARRAY_AGG(
     JSON_BUILD_OBJECT(
@@ -30,7 +17,7 @@ SELECT JSON_BUILD_OBJECT(
         FROM photos ph WHERE ph.style_id = st.style_id
       ),
       'skus', (
-        SELECT JSON_BUILD_OBJECT(
+        SELECT JSON_OBJECT_AGG(
           sk.sku_id, JSON_BUILD_OBJECT(
           'size', sk.size,
           'quantity', sk.quantity
