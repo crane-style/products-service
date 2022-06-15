@@ -1,16 +1,19 @@
 import express from 'express';
-import { Pool } from 'pg';
-import styles from '../dbHelpers';
+import pk from 'pg';
+import dotenv from 'dotenv';
+import stylesQuery from '../dbHelpers.js';
 
-require('dotenv').config();
-// const express = require('express');
-// const { Pool } = require('pg');
-// const cluster = require('cluster');
-// const numCPUs = require('os').cpus().length;
+const { Pool } = pk;
+
+dotenv.config();
+
+// import cluster from 'cluster';
+// import os from 'os';
+// const numCPUs = os.cpus().length;
 
 const db = new Pool({
   database: 'productservices',
-  'max?': 100,
+  'max?': 10,
   'allowExitOnIdle?': false,
 });
 db.on('error', (err, client) => {
@@ -32,7 +35,10 @@ app.get('/product', (req, res) => {
   count = Number.isInteger(count) ? count : 5;
   page = Number.isInteger(page) || page === 0 ? page : 1;
   db.connect()
-    .then((client) => client.query(`SELECT * FROM product LIMIT ${count} OFFSET ${count * page - count}`)
+    .then((client) => client.query(`SELECT *
+    FROM product
+    WHERE (
+      id > ${count * page - count} AND id <  ${count * page})`)
       .then((dbRes) => {
         client.release();
         res.status(200).json(dbRes.rows);
@@ -51,21 +57,33 @@ app.get('/product/:product_id', (req, res) => {
   } else {
     db.connect()
       .then((client) => {
-        client.query(`SELECT * FROM product WHERE id = ${product_id}`)
+        client.query(`
+        SELECT JSON_BUILD_OBJECT(
+          'name', name,
+          'slogan', slogan,
+          'description', description,
+          'category', category,
+          'default_price', default_price,
+          'created_at', created_at,
+          'updated_at', updated_at,
+          'campus', campus,
+          'features', (SELECT ARRAY_TO_JSON(ARRAY_AGG(
+            JSON_BUILD_OBJECT(
+              'feature', feature,
+              'value', value
+            )
+          ))
+          FROM features WHERE product_id = ${product_id}
+          AND value!='null')
+        )
+        FROM product WHERE id = ${product_id};
+        `)
           .then((dbRes) => {
-            client.query(`SELECT feature, value FROM features WHERE product_id=${product_id} AND value!='null'`)
-              .then((dbRes2) => {
-                client.release();
-                dbRes.rows[0].features = dbRes2.rows;
-                res.status(200).json(dbRes.rows);
-              })
-              .catch((err) => {
-                client.release();
-                res.status(500).send(err.stack);
-              });
+            client.release();
+            res.status(200).json(dbRes.rows[0].json_build_object)
           })
           .catch((err) => {
-            client.release(err.stack);
+            client.release();
             res.status(500).send(err.stack);
           });
       });
@@ -77,40 +95,19 @@ app.get('/product/:product_id/styles', (req, res) => {
   if (!Number.isInteger(product_id)) {
     res.status(404).send('Invalid product ID format');
   } else {
-    const resObj = {};
-    resObj.product_id = product_id.toString();
     db.connect()
-      .then((client1) => {
-        client1.query(`SELECT style_id, name, sale_price, original_price, "default?" FROM styles WHERE product_id = ${product_id}`)
-          .then((dbRes1) => {
-            client1.release();
-            resObj.results = dbRes1.rows;
-            return Promise.allSettled(resObj.results.map((styleObj, i) => Promise.all([
-              db.connect()
-                .then((mapClient) => mapClient.query(`SELECT thumbnail_url, url FROM photos WHERE style_id = ${styleObj.style_id}`)
-                  .then((dbRes2) => {
-                    mapClient.release();
-                    resObj.results[i].photos = dbRes2.rows;
-                  })),
-              db.connect()
-                .then((mapClient2) => mapClient2.query(`SELECT sku_id, size, quantity FROM skus where style_id= ${styleObj.style_id}`)
-                  .then((dbRes3) => {
-                    resObj.results[i].skus = {};
-                    dbRes3.rows.forEach((skuDeetsObj) => {
-                      const { sku_id, size, quantity } = skuDeetsObj;
-                      resObj.results[i].skus[sku_id] = { size, quantity };
-                    });
-                    mapClient2.release();
-                  }))])));
-          })
-          .then(() => {
-            res.status(200).json(resObj);
+      .then((client) => {
+        client.query(stylesQuery(product_id))
+          .then((dbRes) => {
+            client.release();
+            res.status(200).send(dbRes.rows[0].json_build_object);
           })
           .catch((err) => {
-            res.sendStatus(400);
+            client.release();
+            res.status(400).send(err.stack);
           });
       })
-      .catch((err) => console.log('dc connection err ', err));
+      .catch((err) => res.status(500).send(err));
   }
 });
 
@@ -121,7 +118,10 @@ app.get('/product/:product_id/related', (req, res) => {
   } else {
     db.connect()
       .then((client) => {
-        client.query(`SELECT related_product_id FROM related WHERE product_id=${product_id}`)
+        client.query(`
+        SELECT ARRAY_TO_JSON(ARRAY_AGG(
+          related_product_id
+        )) FROM related WHERE product_id=${product_id}`)
           .then((dbRes) => {
             const relatedProds = [];
             dbRes.rows.forEach((idObj) => relatedProds.push(idObj.related_product_id));

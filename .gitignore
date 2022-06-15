@@ -1,1 +1,6 @@
-
+node_modules
+config.js
+.env
+.eslintrc.js
+yarn.lock\
+.DS_Store

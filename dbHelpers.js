@@ -1,6 +1,6 @@
-exports.styles = (prodId) => (`
+const styles = (prodId) => (`
   SELECT JSON_BUILD_OBJECT(
-    'product_id', 3,
+    'product_id', ${prodId}::text,
     'results', ARRAY_TO_JSON(ARRAY_AGG(
       JSON_BUILD_OBJECT(
         'style_id', st.style_id,
@@ -30,5 +30,6 @@ exports.styles = (prodId) => (`
     ))
   )
   FROM styles st WHERE product_id = ${prodId};
-  `
-)
+`);
+
+export default styles;
