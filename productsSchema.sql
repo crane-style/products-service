@@ -5,6 +5,49 @@ CREATE DATABASE productservices;
 -- ALTER TABLE product
 --   ADD FOREIGN KEY (campus_id)
 --   REFERENCES campus(id);
+
+DROP TABLE IF EXISTS skus;
+
+CREATE TABLE skus(
+  sku_id INT NOT NULL,
+  style_id INT NOT NULL,
+  size VARCHAR(20) NOT NULL,
+  quantity INT NOT NULL,
+  PRIMARY KEY(sku_id)
+);
+
+COPY skus
+FROM '/Users/irvin/Desktop/skus.csv'(
+  FORMAT CSV,
+  HEADER TRUE
+);
+
+CREATE INDEX skusTable_style_id ON skus(style_id);
+
+
+DROP TABLE IF EXISTS photos;
+
+CREATE TABLE photos(
+  id INT NOT NULL,
+  style_id INT NOT NULL,
+  url VARCHAR(300),
+  thumbnail_url VARCHAR(300),
+  PRIMARY KEY(id)
+);
+
+COPY photos
+FROM '/Users/irvin/Desktop/photos.csv'(
+  QUOTE '''',
+  FORMAT CSV,
+  HEADER TRUE
+);
+
+UPDATE photos
+SET url = replace(url, '"', '');
+
+UPDATE photos
+SET thumbnail_url = replace(thumbnail_url, '"', '');
+
 DROP TABLE IF EXISTS product;
 CREATE TABLE product(
   id INT NOT NULL,
@@ -18,6 +61,7 @@ CREATE TABLE product(
   campus VARCHAR(10) NOT NULL DEFAULT 'hr-rfe',
   PRIMARY KEY(id)
 );
+
 COPY product(
   id,
   name,
@@ -26,9 +70,10 @@ COPY product(
   category,
   default_price
 )
-  FROM '/Users/irvin/Desktop/product.csv'
-  csv
-  header;
+FROM '/Users/irvin/Desktop/product.csv'(
+  FORMAT CSV,
+  HEADER TRUE
+);
 
 DROP TABLE IF EXISTS features;
 CREATE TABLE features(
@@ -38,10 +83,16 @@ CREATE TABLE features(
   value VARCHAR(50),
   PRIMARY KEY(id)
 );
+
 COPY features
-  FROM '/Users/irvin/Desktop/features.csv'
-  csv
-  header;
+FROM '/Users/irvin/Desktop/features.csv'(
+FORMAT CSV,
+HEADER TRUE,
+NULL 'null',
+FORCE_NULL (value)
+);
+
+CREATE INDEX feeaturesTable_product_id ON features(product_id);
 
 DROP TABLE IF EXISTS styles;
 CREATE TABLE styles(
@@ -53,6 +104,7 @@ CREATE TABLE styles(
   "default?" BOOLEAN NOT NULL,
   PRIMARY KEY(style_id)
 );
+
 COPY styles
 FROM '/Users/irvin/Desktop/styles.csv'(
   FORMAT CSV,
@@ -84,45 +136,6 @@ FROM '/Users/irvin/Desktop/cart.csv'(
   HEADER TRUE
 );
 
-DROP TABLE IF EXISTS skus;
-
- CREATE TABLE skus(
-  sku_id VARCHAR(10) NOT NULL,
-  style_id INT NOT NULL,
-  size VARCHAR(20) NOT NULL,
-  quantity INT NOT NULL,
-  PRIMARY KEY(sku_id)
-);
-
-COPY skus
-FROM '/Users/irvin/Desktop/skus.csv'(
-  FORMAT CSV,
-  HEADER TRUE
-);
-
-DROP TABLE IF EXISTS photos;
-
-CREATE TABLE photos(
-  id INT NOT NULL,
-  style_id INT NOT NULL,
-  url VARCHAR(300),
-  thumbnail_url VARCHAR(300),
-  PRIMARY KEY(id)
-);
-
-COPY photos
-FROM '/Users/irvin/Desktop/photos.csv'(
-  QUOTE '''',
-  FORMAT CSV,
-  HEADER TRUE
-);
-
-UPDATE photos
-SET url = replace(url, '"', '');
-
-UPDATE photos
-SET thumbnail_url = replace(thumbnail_url, '"', '');
-
 DROP TABLE IF EXISTS related;
 CREATE TABLE related(
   id INT NOT NULL,
@@ -135,7 +148,11 @@ COPY related FROM '/Users/irvin/Desktop/related.csv'(
   HEADER TRUE
 );
 
+--Indices fors styles endpoint
 
+drop index stylesTable_product_id_style_id;
+drop index photosTable_style_id;
+drop index skusTable_style_id;
 -- DROP TABLE IF EXISTS campus;
 -- CREATE TABLE campus(
 --   id SERIAL NOT NULL,
