@@ -13,6 +13,7 @@ dotenv.config();
 
 const db = new Pool({
   user: process.env.PGUSER,
+  host: process.env.PGHOST,
   password: process.env.PGPW,
   database: process.env.PGDB,
   'max?': process.env.PGCLIENTS,
