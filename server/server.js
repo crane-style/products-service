@@ -2,6 +2,7 @@ import express from 'express';
 import pk from 'pg';
 import dotenv from 'dotenv';
 import stylesQuery from '../dbHelpers.js';
+import path from 'path';
 
 const { Pool } = pk;
 
@@ -31,6 +32,9 @@ db.on('error', (err, client) => {
 // } else {
 const app = express();
 app.use(express.json());
+app.get('http://ec2-44-202-39-26.compute-1.amazonaws.com/loaderio-3b8ff7e384c8d005cd1c3681ba558037/', (req, res) => {
+  res.send(path.join(__dirname,'loaderio-3b8ff7e384c8d005cd1c3681ba558037.txt'))
+})
 app.get('/product', (req, res) => {
   let count = Number.parseFloat(req.query.count);
   let page = Number.parseFloat(req.query.page);
