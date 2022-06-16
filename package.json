@@ -10,6 +10,7 @@
   "type": "module",
   "scripts": {
     "start": "node server/server.js",
+    "installdeps": "npm install --omit=dev",
     "devserver": "nodemon --watch server server/server.js ",
     "teststyles": "k6 run *testStyles.js",
     "testrelated": "k6 run *testRelated.js",

@@ -12,9 +12,10 @@ dotenv.config();
 // const numCPUs = os.cpus().length;
 
 const db = new Pool({
-  database: 'productservices',
-  'max?': 10,
-  'allowExitOnIdle?': false,
+  user: process.env.PGUSER,
+  password: process.env.PGPW,
+  database: process.env.PGDB,
+  'max?': process.env.PGCLIENTS,
 });
 db.on('error', (err, client) => {
   console.error('Unexpected error on idle client', err);
