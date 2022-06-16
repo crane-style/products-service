@@ -17,10 +17,11 @@ export const options = {
 export const errorRate = new Rate('errors');
 
 export default function () {
+  const awsUrl = 'ec2-44-202-39-26.compute-1.amazonaws.com'
   const id = Math.ceil(Math.random() * 1000000);
-  const url = `http://localhost:3000/product/${id}`;
+  const url = `http://${awsUrl}:3000/product/${id}`;
   check(http.get(url), {
     'status is 200': (r) => r.status == 200,
   }) || errorRate.add(1);
-  sleep(0.0001);
+  sleep(1);
 }
