@@ -159,6 +159,7 @@ drop index skusTable_style_id;
 --   campus VARCHAR(15),
 --   PRIMARY KEY(id)
 -- );
+pg_dump -h localhost -d productservices | psql -h ec2-44-203-53-145.compute-1.amazonaws.com -d productservices -U postgres
 
 -- QUOTE '\b' - quote with backspace (thanks a lot @grautur!)
 -- DELIMITER E'\t' - delimiter with tabs
