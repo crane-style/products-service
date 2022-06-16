@@ -155,9 +155,10 @@ const server = app.listen(process.env.PORT, (err) => {
 });
 
 process.on('SIGINT', () => {
+  console.log('closing all connections, please wait')
   server.close(() => {
     db.end();
-    console.log('HTTP server closed');
+    console.log('server and database connections closed, thank you');
   });
 });
 // }
