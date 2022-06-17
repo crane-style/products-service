@@ -34,6 +34,7 @@ const app = express();
 app.use(express.json());
 app.use((req,res, done) => {
   console.log(req)
+  done()
 } )
 // app.get('http://ec2-44-202-39-26.compute-1.amazonaws.com/loaderio-3b8ff7e384c8d005cd1c3681ba558037/', (req, res) => {
 //   console.log('request received', path.join(__dirname,'loaderio-3b8ff7e384c8d005cd1c3681ba558037.txt'))
