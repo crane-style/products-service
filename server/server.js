@@ -38,7 +38,7 @@ app.use(express.json());
 
 app.get(process.env.LOADERIOTOKENURL, (req, res) => {
   console.log('request received', __dirname)
-  res.sendFile(path.join(__dirname,'loaderio-3b8ff7e384c8d005cd1c3681ba558037.txt'))
+  res.sendFile(path.join(__dirname, process.env.LOADERIOFILENAME))
 })
 app.get('/product', (req, res) => {
   let count = Number.parseFloat(req.query.count);
