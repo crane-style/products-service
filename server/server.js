@@ -36,7 +36,7 @@ db.on('error', (err, client) => {
 const app = express();
 app.use(express.json());
 
-app.get('/loaderio-3b8ff7e384c8d005cd1c3681ba558037/', (req, res) => {
+app.get(process.env.LOADERIOTOKENURL, (req, res) => {
   console.log('request received', __dirname)
   res.sendFile(path.join(__dirname,'loaderio-3b8ff7e384c8d005cd1c3681ba558037.txt'))
 })
