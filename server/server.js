@@ -155,7 +155,7 @@ app.post('/cart', (req, res) => {
   res.sendStatus(201);
 });
 
-const server = app.listen(process.env.EXPRESSPORT, process.env.EXPRESSBACKLOG, (err) => {
+const server = app.listen(process.env.EXPRESSPORT, Number.parseInt(process.env.EXPRESSBACKLOG), (err) => {
   if (err) {
     console.log('server error', err);
   } else {
