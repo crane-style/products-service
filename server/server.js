@@ -37,9 +37,10 @@ db.on('error', (err, client) => {
 const app = express();
 app.use(express.json());
 
-app.get(process.env.LOADERIOTOKENURL, (req, res) => {
+app.get('/abc', (req, res) => {
   console.log('request received', __dirname)
-  res.sendFile(path.join(__dirname, 'loaderioVerifyString.txt'))
+  res.send('got it')
+  //res.sendFile(path.join(__dirname, 'loaderioVerifyString.txt'))
 })
 app.get('/product', (req, res) => {
   let count = Number.parseFloat(req.query.count);
