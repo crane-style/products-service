@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+console.log('is this it', __dirname)
 const { Pool } = pk;
 
 dotenv.config();
@@ -155,7 +156,7 @@ app.post('/cart', (req, res) => {
   res.sendStatus(201);
 });
 
-const server = app.listen(process.env.EXPRESSPORT, 'localhost', Number.parseInt(process.env.EXPRESSBACKLOG), (err) => {
+const server = app.listen(process.env.EXPRESSPORT, (err) => {
   if (err) {
     console.log('server error', err);
   } else {
