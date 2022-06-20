@@ -9,7 +9,7 @@
   "private": false,
   "type": "module",
   "scripts": {
-    "start": "sudo node server/server.js",
+    "start": "node server/server.js",
     "installdeps": "npm install --omit=dev",
     "devserver": "nodemon --watch server server/server.js ",
     "teststyles": "k6 run *testStyles.js",
