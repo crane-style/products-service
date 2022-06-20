@@ -35,7 +35,7 @@ db.on('error', (err, client) => {
 // } else {
 const app = express();
 app.use(express.json());
-
+app.get('/', (req, res) => res.send('yup'))
 app.get(process.env.LOADERIOTOKENURL, (req, res) => {
   console.log('request received', __dirname)
   res.sendFile(path.join(__dirname, 'loaderioVerifyString.txt'))
