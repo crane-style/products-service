@@ -38,7 +38,7 @@ app.use(express.json());
 
 app.get(process.env.LOADERIOTOKENURL, (req, res) => {
   console.log('request received', __dirname)
-  res.sendFile(path.join(__dirname, loaderioVerifyString))
+  res.sendFile(path.join(__dirname, 'loaderioVerifyString.txt'))
 })
 app.get('/product', (req, res) => {
   let count = Number.parseFloat(req.query.count);
@@ -155,11 +155,11 @@ app.post('/cart', (req, res) => {
   res.sendStatus(201);
 });
 
-const server = app.listen(process.env.PORT, (err) => {
+const server = app.listen(process.env.EXPRESSPORT, process.env.EXPRESSBACKLOG, (err) => {
   if (err) {
     console.log('server error', err);
   } else {
-    console.log('server listening on port ', process.env.PORT);
+    console.log('server listening on port ', process.env.EXPRESSPORT);
   }
 });
 
