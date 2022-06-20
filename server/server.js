@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-console.log('is this it', __dirname)
 const { Pool } = pk;
 
 dotenv.config();
@@ -37,10 +36,9 @@ db.on('error', (err, client) => {
 const app = express();
 app.use(express.json());
 
-app.get('/abc', (req, res) => {
+app.get(process.env.LOADERIOTOKENURL, (req, res) => {
   console.log('request received', __dirname)
-  res.send('got it')
-  //res.sendFile(path.join(__dirname, 'loaderioVerifyString.txt'))
+  res.sendFile(path.join(__dirname, 'loaderioVerifyString.txt'))
 })
 app.get('/product', (req, res) => {
   let count = Number.parseFloat(req.query.count);
@@ -157,7 +155,7 @@ app.post('/cart', (req, res) => {
   res.sendStatus(201);
 });
 
-const server = app.listen(process.env.EXPRESSPORT, (err) => {
+const server = app.listen(process.env.EXPRESSPORT, process.env.EXPRESSHOST, process.env.EXPRESSBACKLOG, (err) => {
   if (err) {
     console.log('server error', err);
   } else {
